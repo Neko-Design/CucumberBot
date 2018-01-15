@@ -1,8 +1,7 @@
 import os
 import ast
 from cukejson import CukeJson
-from extras import browser_name_from_json, tag_format, publish_path, term, banner
-from messaging import send_teams_message
+from extras import browser_name_from_json, tag_format, publish_path, term, banner,load_config_from_file, send_webhooks, QUIET_MODE
 
 # CucumberBot
 # Written by Ewen McCahon
@@ -16,8 +15,13 @@ try:
 except KeyError:
     TAGS = '[]'
 NICE_TAGS = ast.literal_eval(TAGS)
+try:
+    BOT_CONFIG = os.environ['BOT_CONFIG']
+except KeyError:
+    BOT_CONFIG = './config.yml'
+CONFIG = load_config_from_file(BOT_CONFIG)
 
-print 'Report Directory: ' + TEST_ASSET_PATH
+term('Report Directory: ' + TEST_ASSET_PATH)
 
 def reports_in_directory(report_directory):
     """
@@ -31,7 +35,7 @@ def reports_in_directory(report_directory):
         if os.path.isfile(report_path):
             if '.json' in entry:
                 term('Processing Report: ' + entry)
-                cuke_report = CukeJson(report_path, quiet_mode=True)
+                cuke_report = CukeJson(report_path, quiet_mode=QUIET_MODE)
                 json_files.append({
                     'browser_name': browser_name_from_json(report_path),
                     'report_url': PUBLISH_BASE + TEST_ASSET_PATH + publish_path(report_path),
@@ -45,15 +49,19 @@ def generate_report():
     Main Function to Generate Reports
     Requires Environment Variables Listed in test.sh
     """
+    cucumber_reports = reports_in_directory(TEST_ASSET_PATH)
+    if len(cucumber_reports) < 1:
+        return None
     report_container = {
         'test_suite_name': TEST_SUITE_NAME,
         'results': {},
+        'links': {},
         'tags': tag_format(NICE_TAGS)
     }
     failed_test = False
     errored_test = False
     overall_result = 'Passed'
-    for report_data in reports_in_directory(TEST_ASSET_PATH):
+    for report_data in cucumber_reports:
         report = report_data['report']
         if not report.has_errors():
             scenarios = report.get_total_scenarios()
@@ -61,6 +69,7 @@ def generate_report():
             result_string = str(passed) + "/" + str(scenarios) + " Scenarios Passed"
             term(report_data['browser_name'] + ': ' + result_string)
             report_container['results'][report_data['browser_name']] = result_string
+            report_container['links'][report_data['browser_name']] = report_data['report_url']
             if report.get_build_status() == 'Failed':
                 failed_test = True
         else:
@@ -76,8 +85,8 @@ def generate_report():
 if __name__ == '__main__':
     banner()
     generated_report = generate_report()
-    teams_webhooks = [
-        'https://outlook.microsoft.com/sample/webhook'
-    ]
-    for webhook in teams_webhooks:
-        send_teams_message(generated_report, webhook)
+    if generated_report != None:
+        send_webhooks(CONFIG['webhooks'].items(), generated_report)
+    else:
+        term('No Reports in Directory: ' + str(TEST_ASSET_PATH), 'ERROR')
+        exit(1)

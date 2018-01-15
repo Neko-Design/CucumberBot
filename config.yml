@@ -1,0 +1,7 @@
+---
+quiet_mode: false
+webhooks:
+  teams:
+    - 'https://outlook.microsoft.com/webhook'
+  slack:
+    - 'https://slack.com/webhook'

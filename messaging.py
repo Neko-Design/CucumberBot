@@ -26,6 +26,11 @@ def generate_cards_facts(source_dict):
     return formatted_dict
 
 def send_teams_message(report_container, webhook_url):
+    """
+    Send Teams Message
+    Post Message to Teams Channel via Webhook URL
+    """
+    print 'Sending Teams Message: ' + webhook_url
     message_object = {
         'sections': [
             {
@@ -46,3 +51,11 @@ def send_teams_message(report_container, webhook_url):
     teams_msg = requests.post(webhook_url, headers=JSON_HEADER,
                               data=clean_json(message_object))
     status_check(teams_msg)
+
+def send_slack_message(report_container, webhook_url):
+    """
+    Send Slack Message
+    Post Message to Slack Channel via Webhook URL
+    """
+    # TODO: Implement Slack Messages
+    print 'Sending Slack Message: ' + webhook_url
