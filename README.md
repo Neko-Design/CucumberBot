@@ -16,6 +16,7 @@ You can use `test.sh` as a base to configure your environment. In your chosen bu
 | TEST_SUITE_NAME | Friendly Name for Test Suite. `Neko Automated Tests` |
 | PUBLISH_BASE    | Base URL for HTML Reports (If Enabled). `https://neko.ac/reports/` |
 | CUKE_TAGS       | Tags Executed, Formatted as an Array. `["@tag1", "@tag2"]`|
+| BOT_CONFIG      | Optional. Path to .yml file with webhook configuartion. See sample config file in repo |
 
 Build tools such as Jenkins and TeamCity allow you to use substitution in these paths, so that you can generate a report for every build. CI Tools enable CucumberBot to deliver maximum value. The Jenkins [HTML Publisher plugin](https://wiki.jenkins.io/display/JENKINS/HTML+Publisher+Plugin) is what I've been using in combination with CucumberBot, it works quite well.
 
