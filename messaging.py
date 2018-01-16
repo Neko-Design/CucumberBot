@@ -46,7 +46,7 @@ def send_teams_message(report_container, webhook_url):
             }
         ],
         '@type': 'MessageCard',
-        'summary': 'Summary Report For Jbwere Automated Testing: Error'
+        'summary': 'Summary Report For ' + report_container['test_suite_name'] + ': ' + report_container['result']
     }
     teams_msg = requests.post(webhook_url, headers=JSON_HEADER,
                               data=clean_json(message_object))
