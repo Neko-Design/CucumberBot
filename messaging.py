@@ -15,12 +15,26 @@ def status_check(response_object):
         print "  - REQUEST ERROR: " + str(response_object.text)
     elif 499 < status_code < 599:
         print "  - SERVER ERROR: " + str(response_object.text)
+        
+def markdown_link(target_url, display):
+    return "[" + display + "](" + target_url + ")"
 
-def generate_cards_facts(source_dict):
+def optionally_link(display, links = None):
+    if links == None:
+        return display
+    try:
+        if links[display]:
+            return markdown_link(links[display], display)
+        else:
+            return display
+    except Error as e:
+        return display
+
+def generate_cards_facts(source_dict, links_dict = None):
     formatted_dict = []
     for (key, value) in source_dict.items():
         formatted_dict.append({
-            'name': key,
+            'name': optionally_link(key, links_dict),
             'value': value
         })
     return formatted_dict
@@ -42,7 +56,7 @@ def send_teams_message(report_container, webhook_url):
             },
             {
                 'activityTitle': 'Results by Browser',
-                'facts': generate_cards_facts(report_container['results'])
+                'facts': generate_cards_facts(report_container['results'], report_container['links'])
             }
         ],
         '@type': 'MessageCard',
