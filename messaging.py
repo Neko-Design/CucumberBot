@@ -30,6 +30,10 @@ def optionally_link(display, links = None):
     except Error as e:
         return display
 
+def strip_formatting(message):
+    clean_string = message.replace('_', ' ').replace('-', ' ')
+    return clean_string
+    
 def generate_cards_facts(source_dict, links_dict = None):
     formatted_dict = []
     for (key, value) in source_dict.items():
@@ -48,7 +52,7 @@ def send_teams_message(report_container, webhook_url):
     message_object = {
         'sections': [
             {
-                'activityTitle': 'Summary Report for ' + report_container['test_suite_name'],
+                'activityTitle': 'Summary Report for ' + strip_formatting(report_container['test_suite_name']),
                 'activitySubtitle': 'Test Suite ' + report_container['result'],
                 'facts': [
                     {'name': 'Tags Executed', 'value': report_container['tags']}
@@ -60,7 +64,7 @@ def send_teams_message(report_container, webhook_url):
             }
         ],
         '@type': 'MessageCard',
-        'summary': 'Summary Report For ' + report_container['test_suite_name'] + ': ' + report_container['result']
+        'summary': 'Summary Report For ' + strip_formatting(report_container['test_suite_name']) + ': ' + report_container['result']
     }
     teams_msg = requests.post(webhook_url, headers=JSON_HEADER,
                               data=clean_json(message_object))
